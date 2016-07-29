@@ -1,5 +1,5 @@
 {
-	"name": "dojo2-todo-mvc",
+	"name": "claw-game",
 	"dependencies": {
 		"@reactivex/RxJS": "npm:@reactivex/RxJS",
 		"immutable": "npm:immutable",
