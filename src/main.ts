@@ -7,9 +7,7 @@ import createPanel from 'dojo-widgets/createPanel';
 import createTextInput from 'dojo-widgets/createTextInput';
 import createWidget from 'dojo-widgets/createWidget';
 
-import * as storeTodoActions from './actions/storeTodoActions';
-import * as uiTodoActions from './actions/uiTodoActions';
-import * as widgetTodoActions from './actions/widgetTodoActions';
+import * as gameActions from './actions/gameActions';
 import createMemoryStore from './utils/createLocalMemoryStore';
 import createCheckboxInput from './widgets/createCheckboxInput';
 import createTodoList from './widgets/createTodoList';
@@ -36,7 +34,6 @@ const widgetStore = createMemoryStore({
 			id: 'game-board',
             children: [],
 			classes: ['new-todo']
-//			placeholder: 'What needs to be done?'
 		}
 	]
 });
@@ -55,32 +52,20 @@ app.registerStore('widget-store', widgetStore);
 //	app.registerAction(actionName, action);
 //});
 //
-//Object.keys(widgetTodoActions).forEach((actionName) => {
-//	const action: AnyAction = (<any> widgetTodoActions)[actionName];
-//	action.configure(widgetStore);
-//});
-
-//todoStore.observe().subscribe((options: any) => {
-//	const { puts, deletes } = options;
-//	widgetTodoActions.updateHeaderAndFooter.do(options);
-//
-//	if (deletes.length) {
-//		widgetTodoActions.deleteTodo.do(options);
-//	}
-//
-//	if (puts.length) {
-//		widgetTodoActions.putTodo.do(options);
-//	}
-//});
+Object.keys(gameActions).forEach((actionName) => {
+	const action: AnyAction = (<any> gameActions)[actionName];
+	app.registerAction(actionName, action);
+});
 
 app.loadDefinition({
 	widgets: [
 		{
 			id: 'game-board',
-			factory: createGameBoard
-//			listeners: {
-//				keypress: 'todoInput'
-//			},
+			factory: createGameBoard,
+			listeners: {
+                keypress: 'startOrTrigger',
+                victory: 'victory'
+            }
 		}
 	],
 	customElements: [
@@ -91,4 +76,18 @@ app.loadDefinition({
 	]
 });
 
-app.realize(document.body);
+app.realize(document.body).then(function() {
+    const tickRate = 1;
+    const msPerFrame = 1000/tickRate;
+    let lastLoop = new Date().getTime();
+    let remainder = 0;
+    setInterval(function() {
+        const time = new Date().getTime();
+        const diff = (time - lastLoop)/msPerFrame;
+        const frames = Math.floor(diff);
+        lastLoop = time - (diff - frames) * msPerFrame;
+        for (let i = 0; i < frames; i++) {
+            gameActions.incrementClock.do();
+        }
+    }, 1000);
+});
